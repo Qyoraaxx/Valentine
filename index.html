@@ -1,202 +1,229 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>For You</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <title>Valentine • you & i</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,700;1,400&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
 
-<style>
-body {
-  min-height: 100vh;
-  background: #0f0f0f;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: 'Crimson Text', serif;
-  overflow: hidden;
-}
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,700;1,400&family=Dancing+Script:wght@600&display=swap" rel="stylesheet">
 
-.handwritten { font-family: 'Dancing Script', cursive; }
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
-.envelope {
-  width: 420px;
-  height: 300px;
-  position: relative;
-  perspective: 1200px;
-}
+    body {
+      height: 100vh;
+      background: #0f0f0f;
+      color: #e5e7eb;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Consolas, Menlo, monospace;
+      transition: background 0.4s ease, padding 0.3s ease;
+    }
 
-.flap {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 50%;
-  background: #f4f4f4;
-  clip-path: polygon(0 0, 50% 100%, 100% 0);
-  transform-origin: top;
-  transition: transform 0.8s ease;
-  z-index: 30;
-}
+    .error {
+      width: 100%;
+      max-width: 760px;
+      padding: 48px;
+    }
 
-.envelope.open .flap {
-  transform: rotateX(180deg);
-}
+    .error h1 { font-size: 64px; margin-bottom: 6px; }
+    .error h2 { font-size: 20px; font-weight: normal; margin-bottom: 20px; }
+    .error p { font-size: 14px; color: #9ca3af; line-height: 1.7; margin-bottom: 28px; }
+    .error ul { font-size: 13px; color: #6b7280; margin-bottom: 36px; padding-left: 18px; }
 
-.letter {
-  position: absolute;
-  left: 5%;
-  bottom: 0;
-  width: 90%;
-  height: 90%;
-  background: #fcfaf7;
-  border: 1px solid #e4e4e7;
-  padding: 24px;
-  box-shadow: 0 20px 40px rgba(0,0,0,0.25);
-  transform: translateY(60%);
-  transition: transform 0.8s ease;
-  z-index: 10;
-}
+    .error button {
+      font-family: inherit;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      color: #e5e7eb;
+      padding: 10px 22px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
 
-.envelope.open .letter {
-  transform: translateY(-20%);
-}
+    .error button:hover {
+      background: #262626;
+      border-color: #a83b3b;
+      color: white;
+    }
 
-/* Lily decoration */
-.lily {
-  position: absolute;
-  top: 14px;
-  right: 18px;
-  font-size: 22px;
-  color: #b91c1c;
-  opacity: 0.85;
-}
+    body.card-mode {
+      font-family: 'Crimson Text', serif;
+      background: #111;
+      color: #fff;
+      flex-direction: column;
+      padding: 0 16px;
+    }
 
-/* Hearts */
-.heart {
-  position: absolute;
-  animation: floatUp 2s ease-out forwards;
-  font-size: 22px;
-  pointer-events: none;
-}
+    .handwritten { font-family: 'Dancing Script', cursive; }
+    .perspective { perspective: 1500px; }
 
-@keyframes floatUp {
-  from { opacity: 1; transform: translateY(0) scale(1); }
-  to { opacity: 0; transform: translateY(-120px) scale(1.8); }
-}
-</style>
+    @keyframes softPulse {
+      0% { opacity: 0.7; transform: scale(1); }
+      50% { opacity: 1; transform: scale(1.03); }
+      100% { opacity: 0.7; transform: scale(1); }
+    }
+
+    .pulse-heart {
+      animation: softPulse 2s infinite ease-in-out;
+    }
+
+    @keyframes floatUp {
+      from { transform: translateY(0); opacity: 1; }
+      to { transform: translateY(-80px); opacity: 0; }
+    }
+
+    @keyframes popIn {
+      0% { opacity: 0; transform: scale(0.8); }
+      60% { opacity: 1; transform: scale(1.1); }
+      100% { transform: scale(1); }
+    }
+
+    .group:hover .envelope-flap {
+      transform: rotateX(180deg);
+    }
+
+    .envelope-flap {
+      transform-origin: top;
+      transition: transform 0.5s ease-in-out;
+    }
+  </style>
 </head>
-
 <body>
 
-<div class="text-center text-zinc-400 text-xs tracking-[0.4em] uppercase mb-4 absolute top-8">
-  Tap to Open / Close
-</div>
+<!-- 404 -->
+<div class="error" id="error">
+  <h1>404</h1>
+  <h2>Not Found</h2>
+  <p>The requested resource could not be found on this server.</p>
+  <ul>
+    <li>The URL may be incorrect</li>
+    <li>The resource may no longer exist</li>
+    <li>Please try again later</li>
+  </ul>
 
-<!-- Audio (soft instrumental, no lyrics) -->
-<audio id="bgMusic" loop>
-  <source src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_9d61a1c1a6.mp3" type="audio/mpeg">
-</audio>
-
-<div id="env" class="envelope cursor-pointer" onclick="toggleEnvelope()">
-
-  <!-- LETTER -->
-  <div class="letter">
-    <div class="lily">⚜️</div>
-
-    <h2 class="handwritten text-3xl text-zinc-800 mb-2">Dear Maricar,</h2>
-
-    <p class="text-sm italic text-zinc-600 leading-relaxed mb-6">
-      “I don’t question loving you.
-      I choose you — every day, without hesitation.”
-    </p>
-
-    <div class="text-center my-6">
-      <p class="text-xl font-bold text-red-900 italic uppercase tracking-widest">
-        Will you be my Valentine?
-      </p>
-    </div>
-
-    <!-- BUTTONS -->
-    <div class="relative flex justify-center gap-4 h-14">
-      <button onclick="yesAnswer(event)"
-        class="px-6 py-2 border border-red-800 text-red-900 uppercase tracking-widest text-sm
-               hover:bg-red-800 hover:text-white transition">
-        Yes
-      </button>
-
-      <button id="noBtn"
-        class="px-6 py-2 border border-zinc-400 text-zinc-500 uppercase tracking-widest text-sm
-               absolute right-0 transition">
-        No
-      </button>
-    </div>
-
-    <div class="mt-6 flex justify-between items-end border-t border-red-100 pt-3">
-      <div class="text-[10px] uppercase tracking-widest italic text-red-800/60">
-        I choose you. Always.
-      </div>
-      <div class="text-right">
-        <p class="text-[10px] text-zinc-400 uppercase tracking-widest">Yours,</p>
-        <p class="handwritten text-2xl text-red-900">Nayla</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- ENVELOPE BODY -->
-  <div class="absolute inset-0 bg-white border border-zinc-200 shadow-xl z-0"></div>
-  <div class="flap"></div>
+  <button onclick="showValentine()">💌 open instead</button>
 </div>
 
 <script>
-const env = document.getElementById("env");
-const noBtn = document.getElementById("noBtn");
-const music = document.getElementById("bgMusic");
-let openedOnce = false;
+function showValentine() {
+  document.body.classList.add('card-mode');
+  document.body.innerHTML = `
+    <div class="w-full max-w-[500px] mx-auto perspective flex flex-col items-center">
 
-function toggleEnvelope() {
-  env.classList.toggle("open");
+      <div class="relative w-full aspect-[16/11] group perspective">
 
-  if (!openedOnce) {
-    openedOnce = true;
+        <!-- LETTER -->
+        <div class="absolute inset-x-0 mx-auto w-[92%] h-[95%] bg-[#fcfaf7] shadow-2xl border border-zinc-200 p-8
+          transition-all duration-700 ease-in-out z-10
+          group-hover:-translate-y-52">
 
-    // Play music (iOS requires user interaction)
-    music.volume = 0.35;
-    music.play();
+          <div class="h-full border border-red-100 p-5 flex flex-col justify-between">
 
-    // Gentle vibration (if supported)
-    if (navigator.vibrate) {
-      navigator.vibrate(40);
+            <div class="flex justify-between items-start">
+              <div class="space-y-2">
+                <h2 class="handwritten text-3xl text-zinc-800">Dear Maricar,</h2>
+                <p class="text-sm italic text-zinc-600 max-w-[220px] leading-relaxed">
+                  "I've noticed how my days seem better with you in them.
+                  Not louder, just better."
+                </p>
+              </div>
+              <div class="w-14 h-20 flex items-center justify-center text-3xl">
+                💐🌸
+              </div>
+            </div>
+
+            <div class="text-center space-y-4">
+              <p class="text-xl font-bold text-red-900 italic uppercase tracking-[0.15em]">
+                Will you be my Valentine?
+              </p>
+
+              <div class="flex justify-center gap-6 relative">
+                <button onclick="yesAnswer()"
+                  class="px-6 py-2 bg-red-800 text-white text-sm uppercase tracking-widest">
+                  Yes
+                </button>
+
+                <button id="noBtn"
+                  onmouseenter="moveNo(this)"
+                  onclick="moveNo(this)"
+                  class="px-6 py-2 bg-zinc-300 text-zinc-700 text-sm uppercase tracking-widest relative">
+                  No
+                </button>
+              </div>
+
+              <div id="loveArea" class="relative h-28 mt-2"></div>
+              <div id="yayText" class="hidden text-center mt-4">
+                <p class="handwritten text-4xl text-red-800 animate-[popIn_0.6s_ease-out]">
+                  YAYYY I LOVE YOU MAHAL 💗💗💗
+                </p>
+              </div>
+            </div>
+
+            <div class="flex justify-end border-t border-red-50/50 pt-4">
+              <p class="handwritten text-2xl text-red-900">Yours, Nayla</p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- ENVELOPE -->
+        <div class="absolute inset-0 bg-white border border-zinc-200 shadow-xl overflow-hidden z-0">
+          <div class="absolute inset-0"
+            style="background:linear-gradient(35deg,#fff 50%,#f9f9f9 50.1%);"></div>
+
+          <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+            transition-transform duration-500 group-hover:scale-110 group-hover:rotate-12">
+            <div class="w-14 h-14 bg-red-800 rounded-full shadow-lg border border-red-900
+              flex items-center justify-center pulse-heart">
+              <span class="text-red-300 text-lg">❤</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- FLAP (BEHIND LETTER) -->
+        <div class="absolute top-0 left-0 w-full h-1/2 bg-zinc-100 origin-top envelope-flap shadow-sm z-0"
+          style="clip-path:polygon(0 0,50% 100%,100% 0);"></div>
+
+      </div>
+    </div>
+  `;
+
+  // Re‑attach global functions to the new window context (they are defined in the outer scope anyway, 
+  // but we reassign to make sure they are available inside the card)
+  window.moveNo = function(btn) {
+    if (!btn) return;
+    const x = Math.random() * 140 - 70;
+    const y = Math.random() * 70 - 35;
+    btn.style.transform = `translate(${x}px, ${y}px)`;
+  };
+
+  window.yesAnswer = function() {
+    const area = document.getElementById("loveArea");
+    const yay = document.getElementById("yayText");
+
+    if (yay) yay.classList.remove("hidden");
+
+    for (let i = 0; i < 8; i++) {
+      const h = document.createElement("div");
+      h.innerHTML = "❤";
+      h.style.position = "absolute";
+      h.style.left = Math.random() * 100 + "%";
+      h.style.bottom = "0";
+      h.style.fontSize = (18 + Math.random() * 14) + "px";
+      h.style.color = "#b91c1c";
+      h.style.filter = "drop-shadow(0 0 2px #fbcfe8)";
+      h.style.animation = "floatUp 2s ease-out forwards";
+      h.style.pointerEvents = "none";
+      area.appendChild(h);
+      setTimeout(() => h.remove(), 2000);
     }
-  }
-}
-
-/* NO BUTTON DODGE */
-noBtn.addEventListener("mouseover", moveNo);
-noBtn.addEventListener("touchstart", moveNo);
-
-function moveNo(e) {
-  e.stopPropagation();
-  const x = Math.random() * 160 - 80;
-  const y = Math.random() * 80 - 40;
-  noBtn.style.transform = `translate(${x}px, ${y}px)`;
-}
-
-/* YES = HEARTS */
-function yesAnswer(e) {
-  e.stopPropagation();
-  for (let i = 0; i < 12; i++) {
-    const heart = document.createElement("div");
-    heart.className = "heart";
-    heart.innerText = "❤";
-    heart.style.left = e.clientX + (Math.random()*40 - 20) + "px";
-    heart.style.top = e.clientY + (Math.random()*20 - 10) + "px";
-    heart.style.color = ["#991b1b","#dc2626","#f43f5e"][Math.floor(Math.random()*3)];
-    document.body.appendChild(heart);
-    setTimeout(() => heart.remove(), 2000);
-  }
+  };
 }
 </script>
 
